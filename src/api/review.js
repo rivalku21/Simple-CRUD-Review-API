@@ -33,8 +33,16 @@ controller_object.getReviewById = async(req, res, next) => {
 
     pool.query(`SELECT * FROM public.review WHERE id = $1`, [id], (err, results) => {
         if (err) throw err;
-        response.responseSuccess(res, results.rows);
-        return;
+        if (!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
+        else {
+            response.responseSuccess(res, results.rows);
+            return;
+        }
     })
 };
 
@@ -53,9 +61,15 @@ controller_object.editReview = async(req, res, next) => {
         fileUtils.buildFileAddress(ip, photo)
     );
 
-    pool.query(`SELECT public.users.id FROM public.users WHERE id = $1`, [id_users], (err, results) => {
+    pool.query(`SELECT * FROM public.review WHERE id = $1`, [id], (err, results) => {
         if (err) throw err;
         if(!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
+        if (results.rows.id_users != id_users) {
             response.responseForbidden(res, "Unauthorized");
             return;
         }
@@ -75,9 +89,15 @@ controller_object.deleteReview = async(req, res, next) => {
     const tokenData = jwt.verify(token, process.env.TOKEN_SECRET);
     const id_users = tokenData.id;
 
-    pool.query(`SELECT public.users.id FROM public.users WHERE id = $1`, [id_users], (err, results) => {
+    pool.query(`SELECT * FROM public.review WHERE id = $1`, [id], (err, results) => {
         if (err) throw err;
         if(!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
+        if (results.rows.id_users != id_users) {
             response.responseForbidden(res, "Unauthorized");
             return;
         }

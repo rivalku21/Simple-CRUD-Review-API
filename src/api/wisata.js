@@ -16,9 +16,15 @@ controller_object.getWisataById = async(req, res, next) => {
     const id = req.params.id;
 
     pool.query(`SELECT public.wisata.name FROM public.wisata WHERE id = $1`, [id], (err, results) => {
-        const tempat_wisata = results.rows[0].name;
+        const data = results.rows;
         
         if (err) throw err;
+        if (!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
         else {
             pool.query(`SELECT public.review.id, public.users.name AS username, public.users.images AS users_photo, public.review.calender, public.review.rating, public.review.review, public.review.images FROM public.wisata LEFT JOIN public.review ON public.wisata.id = public.review.id_wisata LEFT JOIN public.users ON public.review.id_users = public.users.id WHERE public.wisata.id = $1`, [id], (err, results) => {
                 if (err) throw err;
@@ -26,7 +32,7 @@ controller_object.getWisataById = async(req, res, next) => {
                 const ratingAvg = avgRating(results.rows);
 
                 return res.status(200).json({
-                    tempat_wisata,
+                    tempat_wisata: data[0].name,
                     ratingAvg,
                     review: results.rows
                 });
@@ -60,6 +66,12 @@ controller_object.editWisata = async(req, res, next) => {
 
     pool.query(`SELECT * FROM public.wisata WHERE name = $1`, [name], (err, results) => {
         if (err) throw err;
+        if (!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
         if (results.rows.length > 0) {
             response.responseFailed(res, "Wisata sudah didaftarkan");
             return;
@@ -77,10 +89,21 @@ controller_object.editWisata = async(req, res, next) => {
 controller_object.deleteWisata = async(req, res, next) => {
     const id = req.params.id;
 
-    pool.query(`DELETE FROM public.wisata WHERE id = $1`, [id], (err, results) => {
+    pool.query(`SELECT * FROM public.wisata WHERE id = $1`, [id], (err, results) => {
         if (err) throw err;
-        response.responseSuccess(res, "Wisata sukses dihapus");
-        return;
+        if (!results.rows.length) {
+            return res.status(404).json({
+                code: 404,
+                status: "Data Not Found",
+            })
+        }
+        else {
+            pool.query(`DELETE FROM public.wisata WHERE id = $1`, [id], (err, results) => {
+                if (err) throw err;
+                response.responseSuccess(res, "Wisata sukses dihapus");
+                return;
+            })
+        }
     })
 };
 
