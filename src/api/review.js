@@ -69,7 +69,7 @@ controller_object.editReview = async(req, res, next) => {
                 status: "Data Not Found",
             })
         }
-        if (results.rows.id_users != id_users) {
+        if (results.rows[0].id_users != id_users) {
             response.responseForbidden(res, "Unauthorized");
             return;
         }
@@ -97,7 +97,7 @@ controller_object.deleteReview = async(req, res, next) => {
                 status: "Data Not Found",
             })
         }
-        if (results.rows.id_users != id_users) {
+        if (results.rows[0].id_users != id_users) {
             response.responseForbidden(res, "Unauthorized");
             return;
         }
