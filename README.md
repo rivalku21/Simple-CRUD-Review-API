@@ -15,4 +15,4 @@ with Login Register
 - PUT `/v1/review/[idReview]` edit a review data by idReview
 - DELETE `/v1/review/[idReview]` delete a review data by idReview
 
-# Testing API : http://3.131.38.123:3000/
+# Testing API : http://3.131.38.123:3000/v1/
